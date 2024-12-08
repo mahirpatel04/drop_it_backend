@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from database import engine, Base, get_db
 from models import Drop, User
 from schema import CreateDropRequest, SampleResponse
@@ -25,7 +25,7 @@ def get_user(
 
 @app.post("/create_drop")
 async def create_drop(
-    content:str,
+    content: str,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -34,3 +34,16 @@ async def create_drop(
     db.commit()
     return {drop.id: drop.content}
 
+@app.delete("/remove_drop")
+async def remove_drop(
+    drop_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+  drop_obj = db.query(Drop).filter(Drop.id == drop_id).filter(Drop.user_id == user.id).first()
+  if drop_obj:
+      db.delete(drop_obj)
+      db.commit()
+      return {"message": "succesful"}
+  else:
+      return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Drop not found")
