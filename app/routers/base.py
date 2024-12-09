@@ -51,3 +51,12 @@ async def remove_drop(
       return {"message": "succesful"}
   else:
       return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Drop not found")
+
+@router.get("/get_drop_ids")
+async def get_drop_ids(
+    user: User = Depends(get_current_user) 
+):
+    if user.drops is None:
+        return {"message": "No drops made"}
+    return user.drops
+    

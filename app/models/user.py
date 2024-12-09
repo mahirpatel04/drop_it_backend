@@ -13,3 +13,4 @@ class User(Base):
     password = Column(String(100))
     drops = Column(ARRAY(Integer), nullable=True)
     private = Column(Boolean, default = False)
+    
