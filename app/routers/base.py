@@ -1,19 +1,23 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from database import engine, Base, get_db
-from models import Drop, User
-from schema import CreateDropRequest, SampleResponse
+from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
+from app.database.database import engine, Base, get_db
+from app.models import Drop, User
+from app.schemas import CreateDropRequest
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from auth import router as auth_router, get_current_user
+from .auth import get_current_user
 from fastapi.logger import logger
 
-app = FastAPI()
-app.include_router(auth_router)
-Base.metadata.create_all(bind=engine)
+router = APIRouter(
+    prefix='',
+    tags=['base']
+)
 
+@router.get("/hello")
+def hello():
+    return {"content": "hello"}
 
-@app.get("/")
+@router.get("/")
 def get_user(
     user: User = Depends(get_current_user),
 ):
@@ -23,7 +27,7 @@ def get_user(
     return user
 
 
-@app.post("/create_drop")
+@router.post("/create_drop")
 async def create_drop(
     content: str,
     user: User = Depends(get_current_user),
@@ -34,7 +38,7 @@ async def create_drop(
     db.commit()
     return {drop.id: drop.content}
 
-@app.delete("/remove_drop")
+@router.delete("/remove_drop")
 async def remove_drop(
     drop_id: int,
     user: User = Depends(get_current_user),
