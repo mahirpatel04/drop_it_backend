@@ -12,3 +12,4 @@ class User(Base):
     email = Column(String(100), unique=True, index=True)
     password = Column(String(100))
     drops = Column(ARRAY(Integer), nullable=True)
+    private = Column(Boolean, default = False)
