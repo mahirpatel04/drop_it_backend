@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Depends, HTTPException, status
-from app.database import engine, Base, get_db
+from app.database.database import engine, Base, get_db
 from app.models import Drop, User
-from app.schema import CreateDropRequest, SampleResponse
+from app.schemas import CreateDropRequest
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from .auth import router as auth_router, get_current_user
+from .routers.auth import router as auth_router, get_current_user
 from fastapi.logger import logger
 
 app = FastAPI()
@@ -14,7 +14,7 @@ Base.metadata.create_all(bind=engine)
 
 @app.get("/hello")
 def hello():
-    return {"content": "vedaNTHP1"}
+    return {"content": "hello"}
 
 
 
