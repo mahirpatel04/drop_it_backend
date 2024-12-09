@@ -9,6 +9,8 @@ from .routers import auth_router, base_router
 from fastapi.logger import logger
 
 app = FastAPI()
+
 app.include_router(auth_router)
 app.include_router(base_router)
+
 Base.metadata.create_all(bind=engine)
