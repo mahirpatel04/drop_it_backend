@@ -4,6 +4,7 @@ from app.models import Drop, User
 from app.schemas import CreateDropRequest
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from passlib.context import CryptContext
 from .auth import get_current_user
 from fastapi.logger import logger
@@ -33,9 +34,20 @@ async def create_drop(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    # Create the drop
     drop = Drop(content=content, user_id=user.id)
+    
+    if user.drops is None:
+        user.drops = []
+    
     db.add(drop)
     db.commit()
+    
+    user.drops = func.array_append(user.drops, drop.id)
+    
+    # Commiting the db
+    db.commit()
+    
     return {drop.id: drop.content}
 
 @router.delete("/remove_drop")
