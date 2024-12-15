@@ -8,8 +8,10 @@ from passlib.context import CryptContext
 from .routers import auth_router, base_router
 from fastapi.logger import logger
 
-app = FastAPI()
+from dotenv import load_dotenv
 
+app = FastAPI()
+load_dotenv()
 app.include_router(auth_router)
 app.include_router(base_router)
 
