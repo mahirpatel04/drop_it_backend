@@ -25,18 +25,18 @@ def get_user(
     logger.info(f"User {user.id} fetching themselves")
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authentication failed')
-    return user
+    return {"message": user.username}
 
 
 @router.post("/create_drop")
 async def create_drop(
-    content: str,
+    create_drop_request: CreateDropRequest,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     # Create the drop
-    drop = Drop(content=content, user_id=user.id)
-    
+    drop = Drop(content=create_drop_request.content, user_id=user.id)
+    logger.info(f"Received content: {create_drop_request.content}")
     if user.drops is None:
         user.drops = []
     
@@ -64,11 +64,17 @@ async def remove_drop(
   else:
       return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Drop not found")
 
-@router.get("/get_drop_ids")
-async def get_drop_ids(
-    user: User = Depends(get_current_user) 
+@router.get("/get_drops")
+async def get_drops(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
-    if user.drops is None:
+    if not user.drops:
         return {"message": "No drops made"}
-    return user.drops
     
+    # Fetch all drops for the user in one query
+    drops = db.query(Drop).filter(Drop.user_id == user.id, Drop.id.in_(user.drops)).all()
+    
+    # Format the response
+    result = [{"id": drop.id, "content": drop.content} for drop in drops]
+    return result
