@@ -9,9 +9,10 @@ from .routers import auth_router, base_router
 from fastapi.logger import logger
 
 from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI()
-load_dotenv()
+
 app.include_router(auth_router)
 app.include_router(base_router)
 
