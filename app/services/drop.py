@@ -31,7 +31,7 @@ def get_drops(user: User, db: Session):
     return db.query(Drop).filter(Drop.user_id == user.id, Drop.id.in_(user.drops)).all()
 
 def get_drops_nearby(latitude: float, longitude: float, radius_km: float, db: Session):
-    all_drops = db.query(Drop).all()
+    all_drops = db.query(Drop).all()  # Get all drops
     nearby_drops = []
 
     for drop in all_drops:
@@ -40,6 +40,8 @@ def get_drops_nearby(latitude: float, longitude: float, radius_km: float, db: Se
         distance = geodesic(user_location, drop_location).km
 
         if distance <= radius_km:
-            nearby_drops.append({"id": drop.id, "content": drop.content, "distance": distance})
+            # Append the Drop object itself
+            drop.distance = distance  # You can add the distance as an attribute if you need it in the ORM object
+            nearby_drops.append(drop)
 
-    return sorted(nearby_drops, key=lambda x: x["distance"])
+    return sorted(nearby_drops, key=lambda x: geodesic((latitude, longitude), (x.latitude, x.longitude)).km)

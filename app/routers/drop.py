@@ -33,7 +33,7 @@ async def create_drop_endpoint(
     db: Session = Depends(get_db)
 ):
     drop = create_drop(create_drop_request, user, db)
-    return {"id": drop.id, "content": drop.content}
+    return {"id": drop.id, "content": drop.content, "latitude": drop.latitude, "longitude": drop.longitude}
 
 @router.delete("/remove_drop")
 async def remove_drop_endpoint(
@@ -63,4 +63,7 @@ async def get_drops_nearby_endpoint(
     db: Session = Depends(get_db)
 ):
     nearby_drops = get_drops_nearby(latitude, longitude, radius_km, db)
-    return {"drops": nearby_drops}
+    return [
+        {"id": drop.id, "content": drop.content, "latitude": drop.latitude, "longitude": drop.longitude}
+        for drop in nearby_drops
+    ]
