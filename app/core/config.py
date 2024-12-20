@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 import logging
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "My FastAPI App"
+    PROJECT_NAME: str = "DropIt"
     VERSION: str = "0.1.0"
     DATABASE_URL: str  # Marked as required; ensure `.env` provides it or handle validation
     SECRET_KEY: str
