@@ -9,7 +9,7 @@ from app.models import User
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
-from fastapi.logger import logger
+from ..core import logger
 
 from ..schemas import UserResponse, CreateUserRequest, Token, GeneralResponse
 from ..services import create_user
@@ -18,9 +18,6 @@ router = APIRouter(
     prefix='/auth',
     tags=['auth']
 )
-
-SECRET_KEY = 'DROPAPP_BACKEND_PRODUCTION_f23o_ci;ru2qipwufdh_ilqwefhqwie_dh'
-ALGORITHM = 'HS256'
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')

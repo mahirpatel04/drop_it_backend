@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from passlib.context import CryptContext
 from .auth import get_current_user
-from fastapi.logger import logger
+from ..core import logger
 from geopy.distance import geodesic
 
 from ..services import *
