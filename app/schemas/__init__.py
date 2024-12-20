@@ -4,4 +4,4 @@ from .drop import *
 from .user import *
 
 class GeneralResponse(BaseModel):
-    response: str
+    detail: str

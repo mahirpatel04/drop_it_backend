@@ -9,19 +9,17 @@ from app.models import User
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
-from fastapi.logger import logger
+from ..core import logger
 
 from ..schemas import UserResponse, CreateUserRequest, Token
 
 
 def create_user(create_user_request: CreateUserRequest, db: Session):
     # Check for duplicate username or email
-    existing_user = db.query(User).filter(
-        (User.username == create_user_request.username) |
-        (User.email == create_user_request.email)
-    ).first()
+    existing_user = db.query(User).filter((User.username == create_user_request.username) | (User.email == create_user_request.email)).first()
 
     if existing_user:
+        logger.info(f"Username: \"{existing_user.username}\" and email: \"{existing_user.email}\" already exists")
         raise ValueError("Username or email already exists.")
 
     # Create a new user

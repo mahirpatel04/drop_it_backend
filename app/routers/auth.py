@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from fastapi.logger import logger
 
-from ..schemas import UserResponse, CreateUserRequest, Token
+from ..schemas import UserResponse, CreateUserRequest, Token, GeneralResponse
 from ..services import create_user
 
 router = APIRouter(
@@ -25,15 +25,19 @@ ALGORITHM = 'HS256'
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
+@router.post('/create-user')
 async def create_user_endpoint(
     create_user_request: CreateUserRequest, 
     db: Session = Depends(get_db)
 ):
     try:
         user = create_user(create_user_request, db)
-        return user
+        return GeneralResponse(detail=user.username)
+    
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
 
 @router.post('/token', response_model=Token)
