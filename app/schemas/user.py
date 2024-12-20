@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
-import datetime
+from datetime import date
 
 
 class CreateUserRequest(BaseModel):
@@ -8,8 +8,11 @@ class CreateUserRequest(BaseModel):
     username: str
     email: str
     password: str
-    birthdate: str
+    birthdate: date
     private: bool
+    
+    class Config:
+        arbitrary_types_allowed = True
 
 class Token(BaseModel):
     access_token: str

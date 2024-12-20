@@ -25,9 +25,15 @@ ALGORITHM = 'HS256'
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
-@router.post('/create-user', status_code=status.HTTP_201_CREATED)
-async def create_user(create_user_request: CreateUserRequest, db: Session = Depends(get_db)):
-    create_user(create_user_request, db)
+async def create_user_endpoint(
+    create_user_request: CreateUserRequest, 
+    db: Session = Depends(get_db)
+):
+    try:
+        user = create_user(create_user_request, db)
+        return user
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
     
 
 @router.post('/token', response_model=Token)
