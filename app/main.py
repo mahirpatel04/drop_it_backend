@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
-from app.database.database import engine, Base, get_db
+from app.database import engine, Base, get_db
 from app.models import Drop, User
 from app.schemas import CreateDropRequest
 from pydantic import BaseModel

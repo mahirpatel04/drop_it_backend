@@ -1,6 +1,6 @@
 from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Float, DateTime
 from sqlalchemy.dialects.postgresql import ARRAY
-from app.database.database import Base
+from app.database import Base
 from datetime import datetime, timezone
 
 class Drop(Base):

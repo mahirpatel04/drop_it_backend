@@ -4,14 +4,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
-from app.database.database import get_db, SessionLocal
+from app.database import get_db, SessionLocal
 from app.models import User
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from fastapi.logger import logger
 
-from ..schemas import UserResponse
+from ..schemas import UserResponse, CreateUserRequest, Token
+from ..services import create_user
 
 router = APIRouter(
     prefix='/auth',
@@ -24,27 +25,10 @@ ALGORITHM = 'HS256'
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
-class CreateUserRequest(BaseModel):
-    first_name: str
-    username: str
-    email: str
-    password: str
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-    
-@router.post('/', status_code=status.HTTP_201_CREATED)
+@router.post('/create-user', status_code=status.HTTP_201_CREATED)
 async def create_user(create_user_request: CreateUserRequest, db: Session = Depends(get_db)):
-    create_user_model = User(
-        first_name = create_user_request.first_name,
-        username = create_user_request.username,
-        email = create_user_request.email,
-        password = bcrypt_context.hash(create_user_request.password)
-    )
-    db.add(create_user_model)
-    db.commit()
+    create_user(create_user_request, db)
+    
 
 @router.post('/token', response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
