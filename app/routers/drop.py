@@ -10,7 +10,7 @@ from geopy.distance import geodesic
 
 from app.services import *
 from app.core import logger
-from app.routers.auth import get_current_user
+from app.services import get_current_user
 
 router = APIRouter(
     prefix='',

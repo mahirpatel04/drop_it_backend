@@ -1,17 +1,14 @@
-from datetime import timedelta, datetime, timezone
-from typing import Annotated
+from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 from app.database import get_db
-from app.models import User
-from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from jose import jwt, JWTError
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core import settings, logger
-from app.schemas import UserResponse, CreateUserRequest, Token, GeneralResponse
-from app.services import create_user
+from app.schemas import UserResponse, CreateUserRequest, Token
+from app.services import *
+from app.utils import AuthenticationError
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
@@ -21,59 +18,32 @@ router = APIRouter(
     tags=['auth']
 )
 
-bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
-
-@router.post('/create-user')
+@router.post('/create-user', response_model=UserResponse)
 async def create_user_endpoint(
     create_user_request: CreateUserRequest, 
     db: Session = Depends(get_db)
 ):
     try:
         user = create_user(create_user_request, bcrypt_context, db)
-        return GeneralResponse(detail=user.username)
-    
+        return user
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    
+        logger.error(f"Unexpected error during user creation: {repr(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.post('/token', response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = authenticate_user(form_data.username, form_data.password, db)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user")
-    token = create_access_token(user.email, user.id, timedelta(hours=12))
-    return Token(access_token=token, token_type='bearer')
-
-def authenticate_user(username: str, password: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == username).first()
-    return user if user and bcrypt_context.verify(password, user.password) else False
-
-def create_access_token(username: str, user_id: int, expires_delta: timedelta):
-    encode = {
-        'sub': username,
-        'id': user_id,
-        'exp': (datetime.now(timezone.utc) + expires_delta)
-    }
-    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
-
-def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], session: Session = Depends(get_db)) -> User:
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(), 
+    db: Session = Depends(get_db)
+):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get('sub')
-        user_id: int = payload.get('id')
-        if username is None or user_id is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user")
-        fetched_user = session.query(User).get(user_id)
-        if not fetched_user:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-        return fetched_user 
-    except JWTError as e:
-        logger.info(f"JWT ERROR: {repr(e)}")
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user")
+        user = authenticate_user(form_data.username, form_data.password, db)
+        token = create_access_token(user.email, user.id, timedelta(hours=12))
+        return Token(access_token=token, token_type='bearer')
     
-@router.get('/user', response_model= UserResponse)
-async def get_user(current_user: User = Depends(get_current_user)):
-    return current_user
+    except AuthenticationError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    except Exception as e:
+        logger.error(f"Unexpected error during login: {repr(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
