@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from geopy.distance import geodesic
+
 from app.models import Drop, User
 from app.schemas import CreateDropRequest
 

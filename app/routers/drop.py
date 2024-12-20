@@ -6,11 +6,11 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from passlib.context import CryptContext
-from .auth import get_current_user
-from ..core import logger
 from geopy.distance import geodesic
 
-from ..services import *
+from app.services import *
+from app.core import logger
+from app.routers.auth import get_current_user
 
 router = APIRouter(
     prefix='',

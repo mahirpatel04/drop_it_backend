@@ -1,7 +1,7 @@
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Float, Date
+from sqlalchemy import Boolean, Column, Integer, String, Date
 from sqlalchemy.dialects.postgresql import ARRAY
+
 from app.database import Base
-import pydantic
 
 class User(Base):
     __tablename__ = "users"

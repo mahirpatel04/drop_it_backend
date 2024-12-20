@@ -1,18 +1,20 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
-from app.database import get_db, SessionLocal
+from app.database import get_db
 from app.models import User
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
-from ..core import logger
 
-from ..schemas import UserResponse, CreateUserRequest, Token, GeneralResponse
-from ..services import create_user
+from app.core import settings, logger
+from app.schemas import UserResponse, CreateUserRequest, Token, GeneralResponse
+from app.services import create_user
+
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
 
 router = APIRouter(
     prefix='/auth',
@@ -28,7 +30,7 @@ async def create_user_endpoint(
     db: Session = Depends(get_db)
 ):
     try:
-        user = create_user(create_user_request, db)
+        user = create_user(create_user_request, bcrypt_context, db)
         return GeneralResponse(detail=user.username)
     
     except ValueError as e:
