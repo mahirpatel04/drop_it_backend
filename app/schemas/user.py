@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from datetime import date
 
@@ -11,8 +11,7 @@ class CreateUserRequest(BaseModel):
     birthdate: date
     private: bool
     
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed = True)
 
 class Token(BaseModel):
     access_token: str
@@ -26,5 +25,4 @@ class UserResponse(BaseModel):
     drops: Optional[List[int]]
     private: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)

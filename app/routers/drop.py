@@ -8,7 +8,7 @@ from app.schemas import CreateDropRequest
 from app.services import *
 
 router = APIRouter(
-    prefix='',
+    prefix='/drop',
     tags=['base']
 )
 

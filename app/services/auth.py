@@ -62,7 +62,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], session: Ann
         user_id: int = payload.get('id')
         if not username or not user_id:
             raise AuthenticationError("Invalid token payload.")
-        user = session.query(User).get(user_id)
+        user = session.get(User, user_id)
         if not user:
             raise AuthenticationError("User not found.")
         return user

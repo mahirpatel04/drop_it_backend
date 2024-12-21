@@ -17,20 +17,22 @@ router = APIRouter(
     prefix='/auth',
     tags=['auth']
 )
-
 @router.post('/create-user', response_model=UserResponse)
 async def create_user_endpoint(
     create_user_request: CreateUserRequest, 
     db: Session = Depends(get_db)
 ):
     try:
+        logger.info(f"Received payload: {create_user_request}")
         user = create_user(create_user_request, bcrypt_context, db)
         return user
     except ValueError as e:
+        logger.error(f"ValueError during user creation: {str(e)}")
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
     except Exception as e:
         logger.error(f"Unexpected error during user creation: {repr(e)}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+
 
 @router.post('/token', response_model=Token)
 async def login_for_access_token(
