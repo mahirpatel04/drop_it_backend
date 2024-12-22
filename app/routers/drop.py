@@ -12,7 +12,7 @@ router = APIRouter(
     tags=['base']
 )
 
-@router.post("/create_drop")
+@router.post("/create-drop")
 async def create_drop_endpoint(
     create_drop_request: CreateDropRequest,
     user: User = Depends(get_current_user),
@@ -27,7 +27,7 @@ async def create_drop_endpoint(
     except SQLAlchemyError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error occurred")
 
-@router.delete("/remove_drop")
+@router.delete("/remove-drop")
 async def remove_drop_endpoint(
     drop_id: int,
     user: User = Depends(get_current_user),
@@ -42,7 +42,7 @@ async def remove_drop_endpoint(
     except SQLAlchemyError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error occurred")
 
-@router.get("/get_drops")
+@router.get("/get-drops")
 async def get_drops_endpoint(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -56,7 +56,7 @@ async def get_drops_endpoint(
     except SQLAlchemyError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error occurred")
 
-@router.get("/get_drops_nearby")
+@router.get("/get-drops-nearby")
 async def get_drops_nearby_endpoint(
     latitude: float,
     longitude: float,

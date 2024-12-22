@@ -10,7 +10,7 @@ async def test_create_drop(client, auth_token):
         "longitude": -74.0060
     }
     headers = {"Authorization": f"Bearer {auth_token}"}
-    response = client.post("/drop/create_drop", json=payload, headers=headers)
+    response = client.post("/drop/create-drop", json=payload, headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["content"] == payload["content"]
