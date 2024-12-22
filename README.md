@@ -23,8 +23,6 @@ This is the backend repository for the DropIt app. There is a basic guideline to
 - alembic.ini
 - README.md
 - requirements.txt
-- 
-	- 
 
 ## Folder Descriptions
 
